@@ -1,7 +1,7 @@
 'use client';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
     Accordion,
@@ -14,16 +14,15 @@ import { Copy } from 'lucide-react';
 import { Wallet } from './wallet';
 import { useGenerator } from '@/app/hooks/useGenerator';
 export default function KeyGenerator() {
-    const { wallets, mnemonic, path, generateWallet } = useGenerator();
-    console.log(wallets);
-    const [isGenerated, setIsGenerated] = useState<boolean>(false);
+    const { wallets, mnemonic, onClickGenerate, clickGenerate, setMnemonic } =
+        useGenerator();
     const copyToClipboard = () => {
         navigator.clipboard.writeText(mnemonic);
         toast.success('Copied to clipboard');
     };
     return (
         <div>
-            {!isGenerated && (
+            {!onClickGenerate && (
                 <motion.div
                     initial={{ opacity: 0, y: 100 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -41,19 +40,21 @@ export default function KeyGenerator() {
                     <div className='flex gap-5'>
                         <Input
                             className='py-6 px-5 text-md'
+                            value={mnemonic}
+                            onChange={(e) => setMnemonic(e.target.value)}
                             type='password'
                             placeholder='Enter your secret phrase (or leave blank to generate)'
                         />
                         <Button
                             className='py-6 px-10'
-                            onClick={() => setIsGenerated((prev) => !prev)}
+                            onClick={() => clickGenerate()}
                         >
                             Generate Wallet
                         </Button>
                     </div>
                 </motion.div>
             )}
-            {isGenerated && (
+            {onClickGenerate && (
                 <>
                     <motion.div
                         initial={{ opacity: 0, y: 100 }}

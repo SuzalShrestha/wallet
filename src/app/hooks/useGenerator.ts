@@ -3,20 +3,36 @@ import { derivePath } from 'ed25519-hd-key';
 import nacl from 'tweetnacl';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
-import { generateMnemonic, mnemonicToSeedSync } from 'bip39';
+import { toast } from 'sonner';
+import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from 'bip39';
 export function useGenerator() {
     const [wallets, setWallets] = useState([]);
+    const [onClickGenerate, setonClickGenerate] = useState<boolean>(false);
     const [index, setIndex] = useState(0);
-    const [mnemonic, setMnemonic] = useState('');
+    const [mnemonic, setMnemonic] = useState<string | null>(null);
     const [path, setPath] = useState("m/44'/501'/0'/0'");
     const getMnemonic = () => {
-        const mnemonic = generateMnemonic();
-        return mnemonic;
+        if (mnemonic) {
+            return mnemonic;
+        }
+        const mnemonics = generateMnemonic();
+        setMnemonic(mnemonics);
+        return mnemonics;
+    };
+    const clickGenerate = () => {
+        if (mnemonic) {
+            if (validateMnemonic(mnemonic)) {
+                setonClickGenerate(true);
+            } else {
+                toast.error('Invalid mnemonic');
+            }
+        } else {
+            setonClickGenerate(true);
+        }
     };
     const getKeys = () => {
         const mnemonic = getMnemonic();
         const seed = mnemonicToSeedSync(mnemonic);
-        setMnemonic(mnemonic);
         const derivedPath = path.replace("/501'/0", `/501'/${index}`);
         setPath(derivedPath);
         const derivedSeed = derivePath(derivedPath, seed.toString('hex')).key;
@@ -35,6 +51,12 @@ export function useGenerator() {
     };
     useEffect(() => {
         generateWallet();
-    }, []);
-    return { wallets, mnemonic, path, generateWallet };
+    }, [onClickGenerate]);
+    return {
+        wallets,
+        mnemonic,
+        onClickGenerate,
+        clickGenerate,
+        setMnemonic,
+    };
 }
