@@ -3,11 +3,6 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { generateMnemonic, mnemonicToSeedSync } from 'bip39';
-import { derivePath } from 'ed25519-hd-key';
-import nacl from 'tweetnacl';
-import { Keypair } from '@solana/web3.js';
-import bs58 from 'bs58';
 import {
     Accordion,
     AccordionContent,
@@ -15,44 +10,17 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion';
 import { toast } from 'sonner';
-import { Copy, Eye, EyeOff } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { Wallet } from './wallet';
+import { useGenerator } from '@/app/hooks/useGenerator';
 export default function KeyGenerator() {
-    const [wallets, setWallets] = useState<any[]>([]);
-    const [accountIndex, setAccountIndex] = useState<number>(0);
-    const paths = [
-        {
-            label: 'Solana',
-            path: `m/44'/501'/0'/0'`,
-        },
-    ];
-    const [mnemonic, setMnemonic] = useState<string>('');
-    const [path, setPath] = useState<string>('');
+    const { wallets, mnemonic, path, generateWallet } = useGenerator();
+    console.log(wallets);
     const [isGenerated, setIsGenerated] = useState<boolean>(false);
-    const getMnemonic = () => {
-        const mnemonic = generateMnemonic();
-        setMnemonic(mnemonic);
-    };
     const copyToClipboard = () => {
         navigator.clipboard.writeText(mnemonic);
         toast.success('Copied to clipboard');
     };
-    const getKeys = () => {
-        const seed = mnemonicToSeedSync(mnemonic);
-        const derivedSeed = derivePath(paths[0].path, seed.toString('hex')).key;
-        const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
-        const publicKey = Keypair.fromSecretKey(secret).publicKey.toBase58();
-        const wallet = {
-            publicKey,
-            privateKey: bs58.encode(secret),
-        };
-        setWallets((prev) => [...prev, wallet]);
-    };
-    useEffect(() => {
-        getMnemonic();
-        getKeys();
-        setPath(paths[0].path);
-    }, [isGenerated]);
     return (
         <div>
             {!isGenerated && (
@@ -143,8 +111,9 @@ export default function KeyGenerator() {
                                 </Button>
                             </div>
                         </div>
-                        <Wallet />
-                        <Wallet />
+                        {wallets.map((wallet, i) => (
+                            <Wallet key={i} wallet={wallet} />
+                        ))}
                     </motion.div>
                 </>
             )}
