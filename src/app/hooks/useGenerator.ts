@@ -18,7 +18,7 @@ export function useGenerator() {
         return paths;
     };
     const getMnemonic = () => {
-        if (mnemonic === '') {
+        if (mnemonic !== '') {
             return mnemonic;
         }
         const mnemonics = generateMnemonic();
@@ -39,7 +39,7 @@ export function useGenerator() {
                 toast.error('Invalid mnemonic');
             }
         }
-        if (mnemonic !== '') {
+        if (mnemonic === '') {
             mnemonics = getMnemonic();
             setMnemonic(mnemonics);
             setonClickGenerate(true);
