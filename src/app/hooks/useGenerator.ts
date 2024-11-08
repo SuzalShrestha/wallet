@@ -1,41 +1,53 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { derivePath } from 'ed25519-hd-key';
 import nacl from 'tweetnacl';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { toast } from 'sonner';
 import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from 'bip39';
+type TWallet = { publicKey: string; privateKey: string };
 export function useGenerator() {
-    const [wallets, setWallets] = useState([]);
+    const [wallets, setWallets] = useState<TWallet[]>([]);
     const [onClickGenerate, setonClickGenerate] = useState<boolean>(false);
-    const [index, setIndex] = useState(0);
-    const [mnemonic, setMnemonic] = useState<string | null>(null);
-    const [path, setPath] = useState("m/44'/501'/0'/0'");
+    const [mnemonic, setMnemonic] = useState<string>('');
+    // const [path, setPath] = useState("m/44'/501'/0'/0'"); //use this variable for other coinss
+    const [index, setIndex] = useState(-1);
+    const increasePath = () => {
+        const paths = `m/44'/501'/${index + 1}'/0'`;
+        setIndex((prev) => prev + 1);
+        return paths;
+    };
     const getMnemonic = () => {
-        if (mnemonic) {
+        if (mnemonic === '') {
             return mnemonic;
         }
         const mnemonics = generateMnemonic();
         setMnemonic(mnemonics);
         return mnemonics;
     };
-    const clickGenerate = () => {
-        if (mnemonic) {
-            if (validateMnemonic(mnemonic)) {
+    const clearWallets = () => {
+        setWallets([]);
+        setIndex(-1);
+    };
+    const getKeys = (userMnemonic?: string) => {
+        let mnemonics;
+        if (userMnemonic) {
+            if (validateMnemonic(userMnemonic)) {
                 setonClickGenerate(true);
+                setMnemonic(userMnemonic);
             } else {
                 toast.error('Invalid mnemonic');
             }
-        } else {
+        }
+        if (!(mnemonic === '')) {
+            mnemonics = getMnemonic();
+            setMnemonic(mnemonics);
             setonClickGenerate(true);
         }
-    };
-    const getKeys = () => {
-        const mnemonic = getMnemonic();
+        setonClickGenerate(true);
         const seed = mnemonicToSeedSync(mnemonic);
-        const derivedPath = path.replace("/501'/0", `/501'/${index}`);
-        setPath(derivedPath);
-        const derivedSeed = derivePath(derivedPath, seed.toString('hex')).key;
+        const newPath = increasePath();
+        const derivedSeed = derivePath(newPath, seed.toString('hex')).key;
         const secret = nacl.sign.keyPair.fromSeed(derivedSeed).secretKey;
         const publicKey = Keypair.fromSecretKey(secret).publicKey.toBase58();
         return {
@@ -43,20 +55,17 @@ export function useGenerator() {
             privateKey: bs58.encode(secret),
         };
     };
-    const generateWallet = () => {
-        const { publicKey, privateKey } = getKeys();
-        setIndex((prev) => prev + 1);
+    const generateWallet = (userMnemonic?: string) => {
+        const { publicKey, privateKey } = getKeys(userMnemonic);
         setWallets((prev) => [...prev, { publicKey, privateKey }]);
         return { publicKey, privateKey };
     };
-    useEffect(() => {
-        generateWallet();
-    }, [onClickGenerate]);
     return {
         wallets,
         mnemonic,
         onClickGenerate,
-        clickGenerate,
         setMnemonic,
+        generateWallet,
+        clearWallets,
     };
 }

@@ -14,8 +14,14 @@ import { Copy } from 'lucide-react';
 import { Wallet } from './wallet';
 import { useGenerator } from '@/app/hooks/useGenerator';
 export default function KeyGenerator() {
-    const { wallets, mnemonic, onClickGenerate, clickGenerate, setMnemonic } =
-        useGenerator();
+    const {
+        wallets,
+        mnemonic,
+        onClickGenerate,
+        generateWallet,
+        setMnemonic,
+        clearWallets,
+    } = useGenerator();
     const copyToClipboard = () => {
         navigator.clipboard.writeText(mnemonic);
         toast.success('Copied to clipboard');
@@ -47,7 +53,7 @@ export default function KeyGenerator() {
                         />
                         <Button
                             className='py-6 px-10'
-                            onClick={() => clickGenerate()}
+                            onClick={() => generateWallet(mnemonic)}
                         >
                             Generate Wallet
                         </Button>
@@ -101,19 +107,23 @@ export default function KeyGenerator() {
                                 Solana Wallet
                             </span>
                             <div className='flex gap-3'>
-                                <Button className='py-6 px-4 font-semibold'>
+                                <Button
+                                    className='py-6 px-4 font-semibold'
+                                    onClick={() => generateWallet()}
+                                >
                                     Add Wallet
                                 </Button>
                                 <Button
                                     className='py-6 px-4 font-semibold'
                                     variant={'destructive'}
+                                    onClick={() => clearWallets()}
                                 >
                                     Clear Wallets
                                 </Button>
                             </div>
                         </div>
                         {wallets.map((wallet, i) => (
-                            <Wallet key={i} wallet={wallet} />
+                            <Wallet key={i} wallet={wallet} index={i + 1} />
                         ))}
                     </motion.div>
                 </>
