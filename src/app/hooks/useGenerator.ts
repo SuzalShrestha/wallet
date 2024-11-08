@@ -39,7 +39,7 @@ export function useGenerator() {
                 toast.error('Invalid mnemonic');
             }
         }
-        if (!(mnemonic === '')) {
+        if (mnemonic !== '') {
             mnemonics = getMnemonic();
             setMnemonic(mnemonics);
             setonClickGenerate(true);
