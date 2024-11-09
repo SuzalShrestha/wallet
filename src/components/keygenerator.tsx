@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { Copy } from 'lucide-react';
 import { Wallet } from './wallet';
 import { useGenerator } from '@/app/hooks/useGenerator';
+import { validateMnemonic } from 'bip39';
 export default function KeyGenerator() {
     const {
         wallets,
@@ -53,7 +54,16 @@ export default function KeyGenerator() {
                         />
                         <Button
                             className='py-6 px-10'
-                            onClick={() => generateWallet(mnemonic)}
+                            onClick={() => {
+                                if (
+                                    validateMnemonic(mnemonic) ||
+                                    mnemonic === ''
+                                ) {
+                                    generateWallet();
+                                } else {
+                                    toast.error('Invalid mnemonic');
+                                }
+                            }}
                         >
                             Generate Wallet
                         </Button>
@@ -87,7 +97,7 @@ export default function KeyGenerator() {
                                                     <Button
                                                         variant={'ghost'}
                                                         key={i}
-                                                        className='p-2 border-1 text-xl font-bold text-gray-300 flex justify-start items-center m-2 p-7 gap-3 rounded-lg'
+                                                        className='border-1 text-xl font-bold text-gray-300 flex justify-start items-center m-2 p-7 gap-3 rounded-lg'
                                                     >
                                                         {word}
                                                     </Button>
