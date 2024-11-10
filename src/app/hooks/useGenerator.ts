@@ -11,6 +11,11 @@ export function useGenerator() {
     const [mnemonic, setMnemonic] = useState<string>('');
     // const [path, setPath] = useState("m/44'/501'/0'/0'"); //use this variable for other coinss
     const [index, setIndex] = useState(-1);
+    const deleteWallet = (index: number) => {
+        const newWallets = wallets.filter((_, i) => i !== index);
+        setWallets(newWallets);
+        setIndex(newWallets.length > 0 ? newWallets.length : -1);
+    };
     const increasePath = () => {
         const paths = `m/44'/501'/${index + 1}'/0'`;
         setIndex((prev) => prev + 1);
@@ -53,5 +58,6 @@ export function useGenerator() {
         setMnemonic,
         generateWallet,
         clearWallets,
+        deleteWallet,
     };
 }

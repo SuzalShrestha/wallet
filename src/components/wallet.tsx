@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Trash } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 export function Wallet({
     wallet,
     index,
+    deleteWallet,
 }: {
     wallet: { publicKey: string; privateKey: string };
     index: number;
+    deleteWallet: (index: number) => void;
 }) {
     const [isEyeVisible, setIsEyeVisible] = useState<boolean>(false);
     const copyToClipboard = (key: string) => {
@@ -21,7 +23,15 @@ export function Wallet({
             </span>
             <div className='flex flex-col text-xl gap-10 bg-secondary rounded-2xl px-10 py-8'>
                 <div>
-                    <div>Public Key</div>
+                    <div className='flex justify-between'>
+                        <span>Public Key</span>
+                        <div
+                            className='p-4 hover:bg-[#2a2a2a]'
+                            onClick={() => deleteWallet(index - 1)}
+                        >
+                            <Trash />
+                        </div>
+                    </div>
                     <div
                         className='text-primary/80 hover:text-primary hover:cursor-pointer'
                         onClick={() => copyToClipboard(wallet.publicKey)}

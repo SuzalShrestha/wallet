@@ -22,11 +22,13 @@ export default function KeyGenerator() {
         generateWallet,
         setMnemonic,
         clearWallets,
+        deleteWallet,
     } = useGenerator();
     const copyToClipboard = () => {
         navigator.clipboard.writeText(mnemonic);
         toast.success('Copied to clipboard');
     };
+
     return (
         <div>
             {!onClickGenerate && (
@@ -133,7 +135,12 @@ export default function KeyGenerator() {
                             </div>
                         </div>
                         {wallets.map((wallet, i) => (
-                            <Wallet key={i} wallet={wallet} index={i + 1} />
+                            <Wallet
+                                key={i}
+                                wallet={wallet}
+                                index={i + 1}
+                                deleteWallet={deleteWallet}
+                            />
                         ))}
                     </motion.div>
                 </>
